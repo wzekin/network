@@ -1,5 +1,7 @@
 # BP神经网络实现
 
+* github: github.com/wzekin/network
+
 ## 基本框架
 
 * 基于链式求导法则实现求导，反向传播，每一层神经网络都实现了如下函数
@@ -56,7 +58,6 @@
   z = w \sdot x
   $$
   
-
 * 反向传播
   $$
   \delta = \sum\delta_{下层} * x
@@ -64,7 +65,7 @@
 
 * 权值更新
   $$
-  w = w + \eta \delta
+  w = w - \eta \delta
   $$
 
 ## Sigmoid激活函数层
@@ -74,7 +75,6 @@
   z = \frac1{1 + exp（-x）}
   $$
   
-
 * 反向传播
   $$
   \delta = z_{输出}(1-z_{输出})\sum\delta_{下层}
@@ -88,7 +88,6 @@
   \hat{y} = - \frac1m \sum (1-y)log(1-x) + ylogx
   $$
   
-
 * 反向传播
   $$
   \delta = \sum \frac{\hat{y}}{x_i} + \frac{1-\hat{y}}{1-x_i}
