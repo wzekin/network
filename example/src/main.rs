@@ -1,15 +1,14 @@
 use model_macro::model;
 use nalgebra::{MatrixMN, U1, U2, U3,U5};
-use network::layer::{Dense, Sigmoid};
+use network::layer::Dense;
 use network::loss::Logistics;
+use network::func::Sigmoid;
+use std::boxed::Box;
 
 model! {
-    Dense::<U1,U2,U1,U5>::new();
-    Sigmoid::<U1,U5,U1,U5>::new();
-    Dense::<U1,U5,U1,U3>::new();
-    Sigmoid::<U1,U3,U1,U3>::new();
-    Dense::<U1,U3,U1,U1>::new();
-    Sigmoid::<U1,U1,U1,U1>::new();
+    Dense::<U1,U2,U1,U5>::new(Box::new(Sigmoid::<U1,U5>::new()));
+    Dense::<U1,U5,U1,U3>::new(Box::new(Sigmoid::<U1,U3>::new()));
+    Dense::<U1,U3,U1,U1>::new(Box::new(Sigmoid::<U1,U1>::new()));
 }
 
 fn main() {
