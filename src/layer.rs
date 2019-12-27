@@ -48,9 +48,9 @@ where
     pub fn new() -> Dense<IR, IC, OR, OC> {
         Dense {
             weights: MatrixMN::<f64, IC, OC>::new_random(),
+            bais: MatrixMN::<f64, U1, OC>::new_random(),
             grads: MatrixMN::<f64, IC, OC>::zeros(),
             bais_grads: MatrixMN::<f64, U1, OC>::zeros(),
-            bais: MatrixMN::<f64, U1, OC>::zeros(),
             input: MatrixMN::<f64, U1, IC>::zeros(),
             output: MatrixMN::<f64, U1, OC>::zeros(),
             marker1: PhantomData,
@@ -73,23 +73,25 @@ where
     ShapeConstraint: DimEq<IR, U1> + DimEq<OR, U1>,
 {
     fn forward(&mut self, input: MatrixMN<f64, U1, IC>, training: bool) -> MatrixMN<f64, U1, OC> {
-        println!("dense_forward_in:{:?}", input);
+        // println!("dense_forward_in:{:?}", input);
         self.input = input;
-        self.output = &self.input * &self.weights + self.bais;
-        println!("dense_forward_out:{:?}", self.output);
+        self.output = &self.input * &self.weights + &self.bais;
+        // println!("dense_forward_out:{:?}", self.output);
         self.output.clone()
     }
 
     fn backward(&mut self, grads: MatrixMN<f64, U1, OC>) -> MatrixMN<f64, U1, IC> {
-        println!("dense_in:{:?}", grads);
-        self.grads = self.input.transpose() * grads;
+        // println!("dense_in:{:?}", grads);
+        self.grads = self.input.transpose() * &grads;
+        self.bais_grads = grads;
         let out = MatrixMN::<f64, U1, OC>::from_element(1.0) * self.grads.transpose();
-        println!("dense_out:{:?}", out);
+        // println!("dense_out:{:?}", out);
         out
     }
     fn update(&mut self, lamada: f64) {
         self.weights -= &self.grads * lamada;
-        println!("dense_weights:{:?}", self.weights)
+        self.bais -= &self.bais_grads * lamada;
+        // println!("dense_weights:{:?}", self.weights)
     }
     fn clear(&mut self) {
         self.grads = MatrixMN::<f64, IC, OC>::zeros()
@@ -137,16 +139,16 @@ where
     ShapeConstraint: DimEq<R, R1> + DimEq<C, C1>,
 {
     fn forward(&mut self, input: MatrixMN<f64, R, C>, _: bool) -> MatrixMN<f64, R, C> {
-        println!("Sigmoid_forward_in:{:?}", input);
+        // println!("Sigmoid_forward_in:{:?}", input);
         self.output = input.map(|x| 1.0 / (1.0 + (-1.0 * x).exp()));
-        println!("Sigmoid_forward_out:{:?}", self.output);
+        // println!("Sigmoid_forward_out:{:?}", self.output);
         self.output.clone()
     }
 
     fn backward(&mut self, grads: MatrixMN<f64, R, C>) -> MatrixMN<f64, R, C> {
-        println!("Sigmoid_in:{:?}", grads);
+        // println!("Sigmoid_in:{:?}", grads);
         let ans = grads.zip_map(&self.output, |i, j| i * j * (1.0 - j));
-        println!("Sigmoid_out:{:?}", ans);
+        // println!("Sigmoid_out:{:?}", ans);
         ans
     }
     fn update(&mut self, _: f64) {}
